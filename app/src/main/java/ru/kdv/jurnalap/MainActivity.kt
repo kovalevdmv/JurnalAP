@@ -6,9 +6,7 @@ import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -128,14 +126,24 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun onClickAddDrug(view: View) {
-
+    fun AddDrug(exist : Boolean){
         try {
 
             val Date = findViewById<EditText>(R.id.editDateDrug)
             val NameDrug = findViewById<EditText>(R.id.editNameDrug)
 
-            if (!(Date.text.isEmpty() || NameDrug.text.isEmpty())) {
+            var drug_name = NameDrug.text.toString()
+
+            val s = findViewById<Spinner>(R.id.spinner)
+
+            if (exist) {
+                drug_name=""
+                val select = s.getSelectedItem()
+                if (select != null)
+                    drug_name = select.toString()
+            }
+
+            if (!(Date.text.isEmpty() || drug_name.isEmpty())) {
 
                 var ExDir = externalMediaDirs[0].toString()
                 var f = ExDir + File.separator + "JAP.db"
@@ -144,8 +152,10 @@ class MainActivity : AppCompatActivity() {
 
                 db.execSQL(
                     "insert into DRUGS (NAME,TIME) values (?,?)",
-                    arrayOf(NameDrug.text, Date.text)
+                    arrayOf(drug_name, Date.text)
                 )
+
+                db.close()
 
                 NameDrug.setText("")
 
@@ -158,7 +168,11 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("err", e.toString())
         }
+    }
 
+    fun onClickAddDrug(view: View) {
+
+        AddDrug(false)
     }
 
     fun onClickDrugCurDate(view: View) {
@@ -179,5 +193,35 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun onClickReadListDrug(view: View) {
+
+        try {
+
+            var ExDir = externalMediaDirs[0].toString()
+            var f = ExDir + File.separator + "JAP.db"
+
+            var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+            var c = db.rawQuery("select NAME from DRUGS group by NAME order by TIME desc", null)
+            var arr = arrayListOf<String>()
+            while (c.moveToNext()) {
+                    arr.add(c.getString(c.getColumnIndex("NAME")))
+            }
+
+            val s = findViewById<Spinner>(R.id.spinner)
+            s.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arr)
+
+            c.close()
+            db.close()
+
+        } catch (e:Exception) {
+            Log.e("1", e.toString())
+        }
+
+    }
+
+    fun onClickAddExsist(view: View) {
+        AddDrug(true)
+    }
 
 }
