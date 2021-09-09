@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+
         android:ems="10"
         android:inputType="date"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,8 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+
         android:ems="10"
-        android:inputType="textPersonName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editDateDrug" />
 
@@ -52,22 +53,24 @@
 
     <Spinner
         android:id="@+id/spinner"
-        android:layout_width="409dp"
-        android:layout_height="wrap_content"
+        android:layout_width="254dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        app:layout_constraintTop_toBottomOf="@+id/editNameDrug"
-        tools:layout_editor_absoluteX="1dp" />
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editNameDrug" />
 
     <Button
-        android:onClick="onClickReadListDrug"
         android:id="@+id/btnReadListDrug"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:onClick="onClickReadListDrug"
         android:text="Read list drug"
-        app:layout_constraintTop_toBottomOf="@+id/spinner"
-        tools:layout_editor_absoluteX="29dp"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner" />
 
     <Button
         android:id="@+id/button5"
@@ -75,8 +78,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:text="add exist"
         android:onClick="onClickAddExsist"
+        android:text="add exist"
         app:layout_constraintStart_toEndOf="@+id/btnReadListDrug"
         app:layout_constraintTop_toBottomOf="@+id/spinner" />
 

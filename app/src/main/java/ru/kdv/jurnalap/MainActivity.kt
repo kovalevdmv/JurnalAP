@@ -39,20 +39,29 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        editDate.setText( SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()) )
+        editDate.setText(
+            SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss",
+                Locale.getDefault()
+            ).format(Date())
+        )
 
 
     }
 
     override fun onRestart() {
 
-        editDate.setText( SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()) )
+        editDate.setText(
+            SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss",
+                Locale.getDefault()
+            ).format(Date())
+        )
 
         //val dd = findViewById<EditText>(R.id.editDateDrug)
 
         super.onRestart()
     }
-
 
 
     fun onCliclAdd(view: View) {
@@ -126,7 +135,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun AddDrug(exist : Boolean){
+    fun AddDrug(exist: Boolean) {
         try {
 
             val Date = findViewById<EditText>(R.id.editDateDrug)
@@ -137,7 +146,7 @@ class MainActivity : AppCompatActivity() {
             val s = findViewById<Spinner>(R.id.spinner)
 
             if (exist) {
-                drug_name=""
+                drug_name = ""
                 val select = s.getSelectedItem()
                 if (select != null)
                     drug_name = select.toString()
@@ -187,7 +196,7 @@ class MainActivity : AppCompatActivity() {
             if (_editDate != null)
                 _editDate.setText(SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
 
-        } catch (e:Exception){
+        } catch (e: Exception) {
             Log.e("1", e.toString())
         }
 
@@ -205,7 +214,7 @@ class MainActivity : AppCompatActivity() {
             var c = db.rawQuery("select NAME from DRUGS group by NAME order by TIME desc", null)
             var arr = arrayListOf<String>()
             while (c.moveToNext()) {
-                    arr.add(c.getString(c.getColumnIndex("NAME")))
+                arr.add(c.getString(c.getColumnIndex("NAME")))
             }
 
             val s = findViewById<Spinner>(R.id.spinner)
@@ -214,7 +223,7 @@ class MainActivity : AppCompatActivity() {
             c.close()
             db.close()
 
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             Log.e("1", e.toString())
         }
 
