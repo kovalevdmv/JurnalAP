@@ -47,6 +47,15 @@ class MainActivity : AppCompatActivity() {
             ).format(Date())
         )
 
+        editDateDrug.setText(
+            SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss",
+                Locale.getDefault()
+            ).format(Date())
+        )
+
+        onClickReadListDrug(View(this))
+
 
     }
 
@@ -123,7 +132,7 @@ class MainActivity : AppCompatActivity() {
                         on date(JPressure.date, "start of day") = date(JDrugs.date, "start of day")
                     left join Drugs
                         on JDrugs.id_drugs = Drugs.id
-                order by JPressure.date
+                order by JPressure.date desc
             """, null)
 
 
@@ -149,7 +158,11 @@ class MainActivity : AppCompatActivity() {
                 //arr_tr.last().addView( View(this))
                 }
 
+
+
                 table.addView(arr_tr.last())
+
+                arr_tr.add( TableRow(this) )
 
             }
 
@@ -224,7 +237,14 @@ class MainActivity : AppCompatActivity() {
 
             var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
 
-            var c = db.rawQuery("select id,name from Drugs", null)
+            var c = db.rawQuery("""
+                select Drugs.id,name 
+                    from Drugs 
+                    left join JDrugs
+                     on Drugs.id=JDrugs.id_drugs
+                     group by Drugs.id,name
+                     order by JDrugs.date desc
+                """, null)
             var arr = arrayListOf<String>()
             while (c.moveToNext()) {
                 arr.add(c.getString(c.getColumnIndex("id")) +") "+c.getString(c.getColumnIndex("name")))
@@ -280,5 +300,7 @@ class MainActivity : AppCompatActivity() {
             Log.e("err", e.toString())
         }
     }
+
+
 
 }

@@ -39,8 +39,7 @@
                     android:id="@+id/editNameDrug"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:text="Name" />
+                    android:ems="10"/>
 
             </TableRow>
 
