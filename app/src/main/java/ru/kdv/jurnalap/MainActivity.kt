@@ -2,6 +2,7 @@ package ru.kdv.jurnalap
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
@@ -72,7 +73,6 @@ class MainActivity : AppCompatActivity() {
             val Up = findViewById<EditText>(R.id.editUp)
             val Down = findViewById<EditText>(R.id.editDown)
             val Puls = findViewById<EditText>(R.id.editPuls)
-            val Comm = findViewById<EditText>(R.id.editTextTextMultiLine)
 
             if (!(Up.text.isEmpty() || Down.text.isEmpty() || Puls.text.isEmpty())) {
 
@@ -81,14 +81,13 @@ class MainActivity : AppCompatActivity() {
 
                 var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
                 db.execSQL(
-                    "insert into main (date,U,D,P,COMMENT) values (?,?,?,?,?)",
-                    arrayOf(Date.text, Up.text, Down.text, Puls.text, Comm.text)
+                    "insert into JPressure (date,u,d,p) values (?,?,?,?)",
+                    arrayOf(Date.text, Up.text, Down.text, Puls.text)
                 )
 
                 Up.setText("")
                 Down.setText("")
                 Puls.setText("")
-                Comm.setText("")
 
                 Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
 
@@ -111,23 +110,51 @@ class MainActivity : AppCompatActivity() {
 
             var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
 
-            var c = db.rawQuery("select * from main", null)
-            var str = ""
+            var c = db.rawQuery("""
+                SELECT
+                    strftime('%m-%d', JPressure.date) as date,
+                    JPressure.u,
+                    JPressure.d,
+                    JPressure.p,
+                    strftime('%H:%M', JDrugs.date) as date_drug,
+                    Drugs.name as name_drug
+                FROM JPressure
+                    left join JDrugs  
+                        on date(JPressure.date, "start of day") = date(JDrugs.date, "start of day")
+                    left join Drugs
+                        on JDrugs.id_drugs = Drugs.id
+                order by JPressure.date
+            """, null)
+
+
+            val table = findViewById<TableLayout>(R.id.tableReportPressure)
+
+
+            var arr_tr = arrayListOf<TableRow>()
+            var arr_tv = arrayListOf<TextView>()
+
             while (c.moveToNext()) {
-                str +=
-                    c.getString(c.getColumnIndex("date")) + ";" +
-                            c.getString(c.getColumnIndex("U")) + ";" +
-                            c.getString(c.getColumnIndex("D")) + ";" +
-                            c.getString(c.getColumnIndex("P")) + ";" +
-                            c.getString(c.getColumnIndex("COMMENT")) + "\n"
+
+                arr_tr.add( TableRow(this) )
+
+                for (cur_col in c.columnNames){
+
+                    arr_tv.add( TextView(this) )
+                    arr_tv.last().text = c.getString(c.getColumnIndex(cur_col))
+                    arr_tr.last().addView( arr_tv.last())
+
+                    arr_tv.add( TextView(this) )
+                    arr_tv.last().text =  "|"
+                    arr_tr.last().addView( arr_tv.last())
+                //arr_tr.last().addView( View(this))
+                }
+
+                table.addView(arr_tr.last())
+
             }
 
             c.close()
             db.close()
-
-            findViewById<EditText>(R.id.editReport).setText(str)
-
-            Log.d("db", str)
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
@@ -135,24 +162,15 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun AddDrug(exist: Boolean) {
+
+
+    fun onClickAddDrug(view: View) {
+
         try {
 
-            val Date = findViewById<EditText>(R.id.editDateDrug)
-            val NameDrug = findViewById<EditText>(R.id.editNameDrug)
+            val drug_name = findViewById<TextView>(R.id.editNameDrug)
 
-            var drug_name = NameDrug.text.toString()
-
-            val s = findViewById<Spinner>(R.id.spinner)
-
-            if (exist) {
-                drug_name = ""
-                val select = s.getSelectedItem()
-                if (select != null)
-                    drug_name = select.toString()
-            }
-
-            if (!(Date.text.isEmpty() || drug_name.isEmpty())) {
+            if (!drug_name.text.isEmpty()) {
 
                 var ExDir = externalMediaDirs[0].toString()
                 var f = ExDir + File.separator + "JAP.db"
@@ -160,13 +178,13 @@ class MainActivity : AppCompatActivity() {
                 var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
 
                 db.execSQL(
-                    "insert into DRUGS (NAME,TIME) values (?,?)",
-                    arrayOf(drug_name, Date.text)
+                    "insert into Drugs (NAME) values (?)",
+                    arrayOf(drug_name.text)
                 )
 
                 db.close()
 
-                NameDrug.setText("")
+                drug_name.setText("")
 
                 Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
 
@@ -177,11 +195,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("err", e.toString())
         }
-    }
-
-    fun onClickAddDrug(view: View) {
-
-        AddDrug(false)
     }
 
     fun onClickDrugCurDate(view: View) {
@@ -211,10 +224,10 @@ class MainActivity : AppCompatActivity() {
 
             var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
 
-            var c = db.rawQuery("select NAME from DRUGS group by NAME order by TIME desc", null)
+            var c = db.rawQuery("select id,name from Drugs", null)
             var arr = arrayListOf<String>()
             while (c.moveToNext()) {
-                arr.add(c.getString(c.getColumnIndex("NAME")))
+                arr.add(c.getString(c.getColumnIndex("id")) +") "+c.getString(c.getColumnIndex("name")))
             }
 
             val s = findViewById<Spinner>(R.id.spinner)
@@ -229,8 +242,43 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun onClickAddExsist(view: View) {
-        AddDrug(true)
+    fun onClickAddDruginJurnal(view: View) {
+        try {
+
+            val Date = findViewById<EditText>(R.id.editDateDrug)
+            val Spin = findViewById<Spinner>(R.id.spinner)
+            val selected = Spin.getSelectedItem()
+
+            if (!(Date.text.isEmpty() || selected == null )) {
+
+                val id_drug = "^\\d*".toRegex().find(selected.toString())?.value ?: ""
+
+                if (id_drug?.isEmpty())
+                {
+                    Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+                    return
+                }
+
+                var ExDir = externalMediaDirs[0].toString()
+                var f = ExDir + File.separator + "JAP.db"
+
+                var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+                db.execSQL(
+                    "insert into JDrugs (date,id_drugs) values (?,?)",
+                    arrayOf(Date.text, id_drug)
+                )
+
+                Date.setText("")
+
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+
+            } else {
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+            }
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
     }
 
 }
