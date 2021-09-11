@@ -17,10 +17,12 @@ import androidx.navigation.ui.setupWithNavController
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_notifications.*
 import java.io.File
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Locale.*
 import kotlin.math.log
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -151,11 +153,21 @@ class MainActivity : AppCompatActivity() {
             var arr_tr = arrayListOf<TableRow>()
             var arr_tv = arrayListOf<TextView>()
 
+            var pre_date=""
+            var next_day = false
+
             while (c.moveToNext()) {
 
                 arr_tr.add( TableRow(this) )
 
+                next_day = false
+
                 for (cur_col in c.columnNames){
+
+                    if (cur_col == "date") {
+                        next_day = pre_date != c.getString(c.getColumnIndex(cur_col))
+                        pre_date = c.getString(c.getColumnIndex(cur_col))
+                    }
 
                     arr_tv.add( TextView(this) )
                     arr_tv.last().text = c.getString(c.getColumnIndex(cur_col))
@@ -164,14 +176,18 @@ class MainActivity : AppCompatActivity() {
                     arr_tv.add( TextView(this) )
                     arr_tv.last().text =  "|"
                     arr_tr.last().addView( arr_tv.last())
-                //arr_tr.last().addView( View(this))
+
                 }
-
-
 
                 table.addView(arr_tr.last())
 
-                arr_tr.add( TableRow(this) )
+                //arr_tr.add( TableRow(this) )
+
+//                if (next_day){
+//                    arr_tr.add( TableRow(this) )
+//                    arr_tr.last().addView(TextView(this))
+//                    table.addView(arr_tr.last())
+//                }
 
             }
 
@@ -480,6 +496,121 @@ class MainActivity : AppCompatActivity() {
 
             c.close()
             db.close()
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
+
+    }
+
+    fun Translit(s : String): String {
+        var m = mapOf<String,String>(
+            "А" to "A",
+            "Б" to "B",
+            "В" to "V",
+            "Г" to "G",
+            "Д" to "D",
+            "Е" to "E",
+            "Ё" to "YO",
+            "Ж" to "ZH",
+            "З" to "Z",
+            "И" to "I",
+            "Й" to "Y",
+            "К" to "K",
+            "Л" to "L",
+            "М" to "M",
+            "Н" to "N",
+            "О" to "O",
+            "П" to "P",
+            "Р" to "R",
+            "С" to "S",
+            "Т" to "T",
+            "У" to "U",
+            "Ф" to "F",
+            "Х" to "KH",
+            "Ц" to "TS",
+            "Ч" to "CH",
+            "Ш" to "SH",
+            "Щ" to "SCH",
+            "Ъ" to "-",
+            "Ы" to "Y",
+            "Ь" to "'",
+            "Э" to "E",
+            "Ю" to "YU",
+            "Я" to "YA"
+
+        )
+
+        var r = ""
+        for (i in s){
+         val new =m.get(i.toString().toUpperCase())
+            if (new==null) {
+             r += i
+         } else {
+             r += new
+         }
+        }
+
+        return r
+    }
+
+    fun onClickSafeToCSV(view: View) {
+
+        try {
+
+            var ExDir = externalMediaDirs[0].toString()
+            var f = ExDir + File.separator + "JAP.db"
+
+            var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+            var c = db.rawQuery("""
+                SELECT
+                    strftime('%Y-%m-%d', JPressure.date) as Дата,
+                    strftime('%H:%M', JPressure.date) as Время,
+                    JPressure.u as Верхнее,
+                    JPressure.d as Нижнее,
+                    JPressure.p as Пульс,
+                    strftime('%H:%M', JDrugs.date) as Прием,
+                    Drugs.name as Лекарство
+                FROM JPressure
+                    left join JDrugs  
+                        on date(JPressure.date, "start of day") = date(JDrugs.date, "start of day")
+                    left join Drugs
+                        on JDrugs.id_drugs = Drugs.id
+                order by JPressure.date desc
+            """, null)
+
+
+            val table = findViewById<TableLayout>(R.id.tableReportPressure)
+
+            var str_header=""
+            var str=""
+
+            while (c.moveToNext()) {
+
+                if (str_header.isEmpty()){
+                    for (cur_col in c.columnNames)
+                        str_header += Translit( cur_col) + ","
+                }
+
+                for (cur_col in c.columnNames){
+
+                    str += Translit( c.getString(c.getColumnIndex(cur_col)) ).replace(",",".") + ","
+
+
+                }
+
+                str += "\n"
+
+            }
+
+            c.close()
+            db.close()
+
+            val save_file = ExDir + File.separator + "ЖурналАД.csv"
+            val end_srt =  str_header + "\n" + str
+            File(save_file).writeText(String(end_srt.toByteArray(), charset("UTF-8")), Charsets.UTF_8)
+            Toast.makeText(this, save_file, Toast.LENGTH_LONG).show()
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
