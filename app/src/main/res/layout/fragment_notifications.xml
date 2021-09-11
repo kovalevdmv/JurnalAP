@@ -12,18 +12,28 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Лекарственные препараты"
-            android:textAlignment="viewStart"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
         <TableLayout
             android:layout_width="409dp"
             android:layout_height="729dp">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Лекарственные препараты"
+                    android:textAlignment="viewStart"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+            </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
@@ -47,6 +57,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <TextView
+                    android:id="@+id/textView12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
                 <Button
                     android:onClick="onClickAddDrug"
                     android:id="@+id/button4"
@@ -57,11 +72,57 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:id="@+id/textView13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/textView22"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Типы событий"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+            </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView23"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Название" />
+
+                <EditText
+                    android:id="@+id/editNameEvent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:id="@+id/textView24"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:onClick="onAddTypeEvent"
+                    android:id="@+id/btnAddTypeEvent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Добавить" />
+            </TableRow>
         </TableLayout>
 
     </LinearLayout>

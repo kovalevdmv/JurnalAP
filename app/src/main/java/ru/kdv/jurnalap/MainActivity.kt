@@ -54,7 +54,16 @@ class MainActivity : AppCompatActivity() {
             ).format(Date())
         )
 
+        editDateEvents.setText(
+            SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss",
+                Locale.getDefault()
+            ).format(Date())
+        )
+
         onClickReadListDrug(View(this))
+
+        onClickReadListTEvents(View(this))
 
 
     }
@@ -121,7 +130,7 @@ class MainActivity : AppCompatActivity() {
 
             var c = db.rawQuery("""
                 SELECT
-                    strftime('%m-%d', JPressure.date) as date,
+                    strftime('%m-%d %H:%M', JPressure.date) as date,
                     JPressure.u,
                     JPressure.d,
                     JPressure.p,
@@ -246,11 +255,47 @@ class MainActivity : AppCompatActivity() {
                      order by JDrugs.date desc
                 """, null)
             var arr = arrayListOf<String>()
+            arr.add("")
             while (c.moveToNext()) {
                 arr.add(c.getString(c.getColumnIndex("id")) +") "+c.getString(c.getColumnIndex("name")))
             }
 
             val s = findViewById<Spinner>(R.id.spinner)
+            s.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arr)
+
+            c.close()
+            db.close()
+
+        } catch (e: Exception) {
+            Log.e("1", e.toString())
+        }
+
+    }
+
+    fun onClickReadListTEvents(view: View) {
+
+        try {
+
+            var ExDir = externalMediaDirs[0].toString()
+            var f = ExDir + File.separator + "JAP.db"
+
+            var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+            var c = db.rawQuery("""
+                select TEvents.id,name 
+                    from TEvents 
+                    left join JEvents
+                     on TEvents.id = JEvents.id_tevents
+                     group by TEvents.id,name
+                     order by JEvents.date desc
+                """, null)
+            var arr = arrayListOf<String>()
+            arr.add("")
+            while (c.moveToNext()) {
+                arr.add(c.getString(c.getColumnIndex("id")) +") "+c.getString(c.getColumnIndex("name")))
+            }
+
+            val s = findViewById<Spinner>(R.id.spinnerTEvents)
             s.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arr)
 
             c.close()
@@ -275,7 +320,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (id_drug?.isEmpty())
                 {
-                    Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Не выбран препарат", Toast.LENGTH_LONG).show()
                     return
                 }
 
@@ -289,6 +334,7 @@ class MainActivity : AppCompatActivity() {
                 )
 
                 Date.setText("")
+                Spin.setSelection(0)
 
                 Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
 
@@ -301,6 +347,145 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun onAddTypeEvent(view: View) {
+        try {
+
+            val name = findViewById<TextView>(R.id.editNameEvent)
+
+            if (!name.text.isEmpty()) {
+
+                var ExDir = externalMediaDirs[0].toString()
+                var f = ExDir + File.separator + "JAP.db"
+
+                var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+                db.execSQL(
+                    "insert into TEvents (NAME) values (?)",
+                    arrayOf(name.text)
+                )
+
+                db.close()
+
+                name.setText("")
+
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+
+            } else {
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+            }
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
+    }
+
+    fun onClickAddJEvents(view: View) {
+
+        try {
+
+            val Date = findViewById<EditText>(R.id.editDateEvents)
+            val Spin = findViewById<Spinner>(R.id.spinnerTEvents)
+            val selected = Spin.getSelectedItem()
+
+            if (!(Date.text.isEmpty() || selected == null )) {
+
+                val id_event = "^\\d*".toRegex().find(selected.toString())?.value ?: ""
+
+                if (id_event?.isEmpty())
+                {
+                    Toast.makeText(this, "Не выбрано событие", Toast.LENGTH_LONG).show()
+                    return
+                }
+
+                var ExDir = externalMediaDirs[0].toString()
+                var f = ExDir + File.separator + "JAP.db"
+
+                var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+                db.execSQL(
+                    "insert into JEvents (date,id_tevents) values (?,?)",
+                    arrayOf(Date.text, id_event)
+                )
+
+                Date.setText("")
+                Spin.setSelection(0)
+
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+
+            } else {
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+            }
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
+
+
+    }
+
+    fun onReportsOfEvents(view: View) {
+
+        try {
+
+            var ExDir = externalMediaDirs[0].toString()
+            var f = ExDir + File.separator + "JAP.db"
+
+            var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+            var c = db.rawQuery("""
+                SELECT
+                    strftime('%m-%d %H:%M', JPressure.date) as date,
+                    JPressure.u,
+                    JPressure.d,
+                    JPressure.p,
+                    strftime('%H:%M', JEvents.date) as date_event,
+                    TEvents.name as name_event
+                FROM JPressure
+                    left join JEvents  
+                        on date(JPressure.date, "start of day") = date(JEvents.date, "start of day")
+                    left join TEvents
+                        on JEvents.id_tevents = TEvents.id
+                order by JPressure.date desc
+            """, null)
+
+
+            val table = findViewById<TableLayout>(R.id.tableReportPressure)
+
+
+            var arr_tr = arrayListOf<TableRow>()
+            var arr_tv = arrayListOf<TextView>()
+
+            while (c.moveToNext()) {
+
+                arr_tr.add( TableRow(this) )
+
+                for (cur_col in c.columnNames){
+
+                    arr_tv.add( TextView(this) )
+                    arr_tv.last().text = c.getString(c.getColumnIndex(cur_col))
+                    arr_tr.last().addView( arr_tv.last())
+
+                    arr_tv.add( TextView(this) )
+                    arr_tv.last().text =  "|"
+                    arr_tr.last().addView( arr_tv.last())
+                    //arr_tr.last().addView( View(this))
+                }
+
+
+
+                table.addView(arr_tr.last())
+
+                arr_tr.add( TableRow(this) )
+
+            }
+
+            c.close()
+            db.close()
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
+
+    }
 
 
 }
