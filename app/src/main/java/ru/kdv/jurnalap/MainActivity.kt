@@ -109,15 +109,17 @@ class MainActivity : AppCompatActivity() {
                 Down.setText("")
                 Puls.setText("")
 
-                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
             } else {
-                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
         }
+
+        onClickSafeToCSV(View(this))
 
     }
 
@@ -224,10 +226,10 @@ class MainActivity : AppCompatActivity() {
 
                 drug_name.setText("")
 
-                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
             } else {
-                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
@@ -336,7 +338,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (id_drug?.isEmpty())
                 {
-                    Toast.makeText(this, "Не выбран препарат", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Не выбран препарат", Toast.LENGTH_SHORT).show()
                     return
                 }
 
@@ -352,15 +354,17 @@ class MainActivity : AppCompatActivity() {
                 Date.setText("")
                 Spin.setSelection(0)
 
-                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
             } else {
-                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
         }
+
+        onClickSafeToCSV(View(this))
     }
 
     fun onAddTypeEvent(view: View) {
@@ -384,10 +388,10 @@ class MainActivity : AppCompatActivity() {
 
                 name.setText("")
 
-                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
             } else {
-                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
@@ -409,7 +413,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (id_event?.isEmpty())
                 {
-                    Toast.makeText(this, "Не выбрано событие", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Не выбрано событие", Toast.LENGTH_SHORT).show()
                     return
                 }
 
@@ -425,10 +429,10 @@ class MainActivity : AppCompatActivity() {
                 Date.setText("")
                 Spin.setSelection(0)
 
-                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
             } else {
-                Toast.makeText(this, "Не все указано", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
@@ -610,7 +614,7 @@ class MainActivity : AppCompatActivity() {
             val save_file = ExDir + File.separator + "ЖурналАД.csv"
             val end_srt =  str_header + "\n" + str
             File(save_file).writeText(String(end_srt.toByteArray(), charset("UTF-8")), Charsets.UTF_8)
-            Toast.makeText(this, save_file, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
