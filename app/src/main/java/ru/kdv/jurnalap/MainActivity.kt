@@ -608,6 +608,7 @@ class MainActivity : AppCompatActivity() {
                 union
                 select Feeling.date, "", Feeling.change
                 from Feeling
+                order by date desc
             """, null)
 
 
