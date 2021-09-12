@@ -42,6 +42,17 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        setCurDate()
+
+        onClickReadListDrug(View(this))
+
+        onClickReadListTEvents(View(this))
+
+
+    }
+
+    fun setCurDate(){
+
         editDate.setText(
             SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss",
@@ -69,12 +80,6 @@ class MainActivity : AppCompatActivity() {
                 Locale.getDefault()
             ).format(Date())
         )
-
-        onClickReadListDrug(View(this))
-
-        onClickReadListTEvents(View(this))
-
-
     }
 
     fun onCliclAdd(view: View) {
@@ -103,6 +108,8 @@ class MainActivity : AppCompatActivity() {
 
                 Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
+                onClickSafeToCSV(View(this))
+
             } else {
                 Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
@@ -111,7 +118,7 @@ class MainActivity : AppCompatActivity() {
             Log.e("err", e.toString())
         }
 
-        onClickSafeToCSV(View(this))
+        setCurDate()
 
     }
 
@@ -328,6 +335,8 @@ class MainActivity : AppCompatActivity() {
 
                 Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
+                onClickSafeToCSV(View(this))
+
             } else {
                 Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
@@ -336,7 +345,9 @@ class MainActivity : AppCompatActivity() {
             Log.e("err", e.toString())
         }
 
-        onClickSafeToCSV(View(this))
+
+
+        setCurDate()
     }
 
     fun onAddTypeEvent(view: View) {
@@ -403,6 +414,8 @@ class MainActivity : AppCompatActivity() {
 
                 Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
+                onClickSafeToCSV(View(this))
+
             } else {
                 Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
@@ -411,6 +424,9 @@ class MainActivity : AppCompatActivity() {
             Log.e("err", e.toString())
         }
 
+
+
+        setCurDate()
 
     }
 
@@ -530,6 +546,85 @@ class MainActivity : AppCompatActivity() {
         return r
     }
 
+    fun SafePressureTableWithEvents(){
+        try {
+
+            var ExDir = externalMediaDirs[0].toString()
+            var f = ExDir + File.separator + "JAP.db"
+
+            var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+            var c = db.rawQuery("""
+                SELECT
+                    JPressure.date as Дата,
+                    JPressure.u as Вер,
+                    JPressure.d as Ниж,
+                    JPressure.p as Пул,
+                    "" as Препарат,
+                    "" as Событие,
+                    "" as Изм_самоч
+                FROM JPressure
+                union 
+                SELECT
+                    JDrugs.date,"","","",
+                    Drugs.name,"",""
+                FROM JDrugs  
+                    left join Drugs
+                        on JDrugs.id_drugs = Drugs.id
+                union 
+                SELECT
+                    JEvents.date,"","","","",
+                    TEvents.name,
+                    ""
+                FROM JEvents  
+                    left join TEvents
+                        on JEvents.id_tevents = TEvents.id
+                union 
+                select date,"","","","","",change
+                from Feeling
+
+                order by Дата desc
+            """, null)
+
+
+            val table = findViewById<TableLayout>(R.id.tableReportPressure)
+
+            var str_header=""
+            var str=""
+
+            while (c.moveToNext()) {
+
+                if (str_header.isEmpty()){
+                    for (cur_col in c.columnNames)
+                        str_header += Translit( cur_col) + ","
+                }
+
+                for (cur_col in c.columnNames){
+
+                    str += Translit( c.getString(c.getColumnIndex(cur_col)) ).replace(",",".") + ","
+
+
+                }
+
+                str += "\n"
+
+            }
+
+            c.close()
+            db.close()
+
+            val save_file = ExDir + File.separator + "РасширенныйЖурналАД.csv"
+            val end_srt =  str_header + "\n" + str
+            File(save_file).writeText(String(end_srt.toByteArray(), charset("UTF-8")), Charsets.UTF_8)
+            Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
+    }
+
+
+
     fun SafePressureTable(){
         try {
 
@@ -601,7 +696,7 @@ class MainActivity : AppCompatActivity() {
             var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
 
             var c = db.rawQuery("""
-                select JEvents.date as Дата, TEvents.name as Событие, 0 as Изменения
+                select JEvents.date as Дата, TEvents.name as Событие, "" as Изменения
                 from JEvents
                 left join TEvents
                 on JEvents.id_tevents=TEvents.id
@@ -648,6 +743,8 @@ class MainActivity : AppCompatActivity() {
 
         SafeFeelingTable()
 
+        SafePressureTableWithEvents()
+
     }
 
     fun onClickAddFeeling(view: View) {
@@ -674,6 +771,8 @@ class MainActivity : AppCompatActivity() {
 
                 Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
 
+                onClickSafeToCSV(View(this))
+
             } else {
                 Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
             }
@@ -681,6 +780,10 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("err", e.toString())
         }
+
+
+
+        setCurDate()
     }
 
 

@@ -8,18 +8,18 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="ru.kdv.jurnalap.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:label="Показатели"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="ru.kdv.jurnalap.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
+        android:label="Отчеты"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="ru.kdv.jurnalap.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
+        android:label="Списки"
         tools:layout="@layout/fragment_notifications" />
 </navigation>
