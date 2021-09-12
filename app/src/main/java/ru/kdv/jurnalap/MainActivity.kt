@@ -63,27 +63,19 @@ class MainActivity : AppCompatActivity() {
             ).format(Date())
         )
 
-        onClickReadListDrug(View(this))
-
-        onClickReadListTEvents(View(this))
-
-
-    }
-
-    override fun onRestart() {
-
-        editDate.setText(
+        editDateFeeling.setText(
             SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss",
                 Locale.getDefault()
             ).format(Date())
         )
 
-        //val dd = findViewById<EditText>(R.id.editDateDrug)
+        onClickReadListDrug(View(this))
 
-        super.onRestart()
+        onClickReadListTEvents(View(this))
+
+
     }
-
 
     fun onCliclAdd(view: View) {
 
@@ -202,8 +194,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
-
     fun onClickAddDrug(view: View) {
 
         try {
@@ -235,24 +225,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("err", e.toString())
         }
-    }
-
-    fun onClickDrugCurDate(view: View) {
-
-        try {
-
-            val _editDateDrug = findViewById<TextView>(R.id.editDateDrug)
-            if (_editDateDrug != null)
-                _editDateDrug.setText(SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
-
-            val _editDate = findViewById<TextView>(R.id.editDate)
-            if (_editDate != null)
-                _editDate.setText(SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
-
-        } catch (e: Exception) {
-            Log.e("1", e.toString())
-        }
-
     }
 
     fun onClickReadListDrug(view: View) {
@@ -558,8 +530,7 @@ class MainActivity : AppCompatActivity() {
         return r
     }
 
-    fun onClickSafeToCSV(view: View) {
-
+    fun SafePressureTable(){
         try {
 
             var ExDir = externalMediaDirs[0].toString()
@@ -571,11 +542,11 @@ class MainActivity : AppCompatActivity() {
                 SELECT
                     strftime('%Y-%m-%d', JPressure.date) as Дата,
                     strftime('%H:%M', JPressure.date) as Время,
-                    JPressure.u as Верхнее,
-                    JPressure.d as Нижнее,
-                    JPressure.p as Пульс,
+                    JPressure.u as Вер,
+                    JPressure.d as Ниж,
+                    JPressure.p as Пул,
                     strftime('%H:%M', JDrugs.date) as Прием,
-                    Drugs.name as Лекарство
+                    Drugs.name as Препарат
                 FROM JPressure
                     left join JDrugs  
                         on date(JPressure.date, "start of day") = date(JDrugs.date, "start of day")
@@ -619,7 +590,96 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("err", e.toString())
         }
+    }
 
+    fun SafeFeelingTable(){
+        try {
+
+            var ExDir = externalMediaDirs[0].toString()
+            var f = ExDir + File.separator + "JAP.db"
+
+            var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+            var c = db.rawQuery("""
+                select JEvents.date as Дата, TEvents.name as Событие, 0 as Изменения
+                from JEvents
+                left join TEvents
+                on JEvents.id_tevents=TEvents.id
+                union
+                select Feeling.date, "", Feeling.change
+                from Feeling
+            """, null)
+
+
+            val table = findViewById<TableLayout>(R.id.tableReportPressure)
+
+            var str_header=""
+            var str=""
+
+            while (c.moveToNext()) {
+
+                if (str_header.isEmpty()){
+                    for (cur_col in c.columnNames)
+                        str_header += Translit( cur_col) + ","
+                }
+                for (cur_col in c.columnNames){
+                    str += Translit( c.getString(c.getColumnIndex(cur_col)) ).replace(",",".") + ","
+                }
+                str += "\n"
+            }
+
+            c.close()
+            db.close()
+
+            val save_file = ExDir + File.separator + "ИзмененияСамочувствия.csv"
+            val end_srt =  str_header + "\n" + str
+            File(save_file).writeText(String(end_srt.toByteArray(), charset("UTF-8")), Charsets.UTF_8)
+            Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
+    }
+
+    fun onClickSafeToCSV(view: View) {
+
+        SafePressureTable()
+
+        SafeFeelingTable()
+
+    }
+
+    fun onClickAddFeeling(view: View) {
+        try {
+
+            val date = findViewById<TextView>(R.id.editDateFeeling)
+            val change = findViewById<TextView>(R.id.editFeelingChange)
+
+            if (!(date.text.isEmpty() || change.text.isEmpty())) {
+
+                var ExDir = externalMediaDirs[0].toString()
+                var f = ExDir + File.separator + "JAP.db"
+
+                var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
+
+                db.execSQL(
+                    "insert into Feeling (date,change) values (?,?)",
+                    arrayOf(date.text,change.text)
+                )
+
+                db.close()
+
+                change.setText("")
+
+                Toast.makeText(this, "Данные добавлены", Toast.LENGTH_SHORT).show()
+
+            } else {
+                Toast.makeText(this, "Не все указано", Toast.LENGTH_SHORT).show()
+            }
+
+        } catch (e: Exception) {
+            Log.e("err", e.toString())
+        }
     }
 
 
