@@ -616,7 +616,7 @@ class MainActivity : AppCompatActivity() {
             val save_file = ExDir + File.separator + "РасширенныйЖурналАД.csv"
             val end_srt =  str_header + "\n" + str
             File(save_file).writeText(String(end_srt.toByteArray(), charset("UTF-8")), Charsets.UTF_8)
-            Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
@@ -680,7 +680,7 @@ class MainActivity : AppCompatActivity() {
             val save_file = ExDir + File.separator + "ЖурналАД.csv"
             val end_srt =  str_header + "\n" + str
             File(save_file).writeText(String(end_srt.toByteArray(), charset("UTF-8")), Charsets.UTF_8)
-            Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
@@ -730,7 +730,7 @@ class MainActivity : AppCompatActivity() {
             val save_file = ExDir + File.separator + "ИзмененияСамочувствия.csv"
             val end_srt =  str_header + "\n" + str
             File(save_file).writeText(String(end_srt.toByteArray(), charset("UTF-8")), Charsets.UTF_8)
-            Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, save_file, Toast.LENGTH_SHORT).show()
 
         } catch (e: Exception) {
             Log.e("err", e.toString())
@@ -744,6 +744,8 @@ class MainActivity : AppCompatActivity() {
         SafeFeelingTable()
 
         SafePressureTableWithEvents()
+
+        Toast.makeText(this, "save complete", Toast.LENGTH_SHORT).show()
 
     }
 
