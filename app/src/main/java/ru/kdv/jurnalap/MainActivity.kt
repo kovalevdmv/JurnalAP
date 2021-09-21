@@ -633,21 +633,35 @@ class MainActivity : AppCompatActivity() {
 
             var db = SQLiteDatabase.openDatabase(f, null, SQLiteDatabase.OPEN_READWRITE)
 
+/*
             var c = db.rawQuery("""
                 SELECT
-                    strftime('%Y-%m-%d', JPressure.date) as Дата,
-                    strftime('%H:%M', JPressure.date) as Время,
+                    JPressure.date as Дата,
                     JPressure.u as Вер,
                     JPressure.d as Ниж,
                     JPressure.p as Пул,
-                    strftime('%H:%M', JDrugs.date) as Прием,
-                    Drugs.name as Препарат
+                    "" as Препарат
                 FROM JPressure
-                    left join JDrugs  
-                        on date(JPressure.date, "start of day") = date(JDrugs.date, "start of day")
+                union
+                SELECT
+                    JDrugs.date,"","","",
+                    Drugs.name
+                FROM JDrugs
                     left join Drugs
                         on JDrugs.id_drugs = Drugs.id
-                order by JPressure.date desc
+
+                order by Дата desc
+            """, null)
+*/
+
+            var c = db.rawQuery("""
+                SELECT
+                    JPressure.date as Дата,
+                    JPressure.u as Вер,
+                    JPressure.d as Ниж,
+                    JPressure.p as Пул
+                FROM JPressure
+                order by Дата desc
             """, null)
 
 
